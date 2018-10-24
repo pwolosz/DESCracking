@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="DESEncoding">
+      <UniqueIdentifier>{16a388cd-573e-4b7f-a7a6-b75f44283158}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{de92b533-3fe2-4556-9c01-83e4030f28ca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DESEncoder.h">
+      <Filter>DESEncoding</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryHelper.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DESEncoder.cpp">
+      <Filter>DESEncoding</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
