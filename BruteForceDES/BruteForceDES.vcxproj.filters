@@ -22,9 +22,4 @@
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DESEncoder.cpp">
-      <Filter>DESEncoding</Filter>
-    </ClCompile>
-  </ItemGroup>
 </Project>
