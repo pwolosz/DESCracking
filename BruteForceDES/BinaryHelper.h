@@ -30,3 +30,26 @@ __host__ __device__ uint64_t pc(uint64_t block, int block_size, int pc_table[], 
 
 	return out_block;
 }
+
+__host__ __device__ unsigned short* get_indexes(uint64_t block, int block_number) {
+	int bit_number = 6 * (8 - block_number);
+	uint64_t mask = ((uint64_t)63) << bit_number;
+	uint64_t selected_block = (block & mask) >> bit_number;
+	unsigned short *indexes = new unsigned short[2];
+
+	indexes[1] = ((selected_block & (1U << 5)) >> 4) + (selected_block & 1U);
+	indexes[0] = (selected_block >> 1) & 15;
+
+	return indexes;
+}
+
+__host__ __device__ uint64_t code_with_s(uint64_t block) {
+	uint64_t coded_block = 0;
+	unsigned short *indexes;
+	for (int i = 1; i <= 8; i++) {
+		indexes = get_indexes(block, i);
+		coded_block = (coded_block << 4) + S[i - 1][indexes[1]][indexes[0]];
+	}
+
+	return coded_block;
+}

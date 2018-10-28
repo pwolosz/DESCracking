@@ -10,9 +10,13 @@
 
 int main()
 {
-	uint64_t message[] = { 81985529216486895 };
+	uint64_t message[] = { 123 };
 	uint64_t key = 1383827165325090801;
 	int blocks = 1;
-	uint64_t *keys = encode(message, key, 1);
+	uint64_t *message_blocks = encode(message, key, blocks);
+
+	for (int i = 0; i < blocks; i++) {
+		printf("%llu \n", message_blocks[i]);
+	}
 }
 
