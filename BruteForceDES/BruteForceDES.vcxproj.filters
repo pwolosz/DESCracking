@@ -21,5 +21,6 @@
     <ClInclude Include="BinaryHelper.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers.h" />
   </ItemGroup>
 </Project>

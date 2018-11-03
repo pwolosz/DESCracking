@@ -8,10 +8,14 @@
 #else
 #define CONSTANT
 #endif
-
-CONSTANT  int PC1_SIZE = 56;
+CONSTANT char ALPHABET[] = { 'a','b','c' };
+CONSTANT int ALPHABET_SIZE = 3;
+CONSTANT int PC1_SIZE = 56;
+CONSTANT int MAX_MESSAGE_LENGTH = 4;
+CONSTANT int BITS_PER_CHAR = 8;
 CONSTANT unsigned short Y_INDEX_MASK = 33;
 CONSTANT unsigned short X_INDEX_MASK = 30;
+CONSTANT int MAX_MESSAGE_BLOCK_SIZE = 8;
 
 CONSTANT  int PC1[] = {	57,		49,		41,		33,		25,		17,		9,
 						1,		58,		50,		42,		34,		26,		18,

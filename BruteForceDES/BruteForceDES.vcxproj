@@ -84,6 +84,7 @@
     <ClInclude Include="BinaryHelper.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DESEncoder.h" />
+    <ClInclude Include="Helpers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
