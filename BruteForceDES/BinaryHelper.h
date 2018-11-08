@@ -37,7 +37,7 @@ __host__ __device__ unsigned short* get_indexes(uint64_t block, int block_number
 	int bit_number = 6 * (8 - block_number);
 	uint64_t mask = ((uint64_t)63) << bit_number;
 	uint64_t selected_block = (block & mask) >> bit_number;
-	unsigned short *indexes = new unsigned short[2];
+	unsigned short indexes = new unsigned short[2];
 
 	indexes[1] = ((selected_block & (1U << 5)) >> 4) + (selected_block & 1U);
 	indexes[0] = (selected_block >> 1) & 15;
@@ -132,8 +132,6 @@ __device__ __host__ uint64_t* get_messages(int length) {
 	return words;
 }
 
-__device__ __host__ uint64_t* encode_message(char *str, int size) {
-	if (MAX_MESSAGE_BLOCK_SIZE >= MAX_MESSAGE_LENGTH) {
-		return new uint64_t[1]{ string_to_int(str, size) };
-	}
+__device__ __host__ uint64_t encode_message(char *str, int size) {
+	return string_to_int(str, size);
 }
