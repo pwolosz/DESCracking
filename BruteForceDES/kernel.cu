@@ -8,7 +8,7 @@
 #include "iterator"
 #include "Helpers.h"
 
-__global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size, int dev_block_size, int blocks_x, int message_blocks) {
+__global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size, int dev_block_size, int blocks_x, int message_blocks, int *is_finised) {
 	int index = threadIdx.x;
 	int block = blockIdx.x;
 	int dim_pow = 0;
@@ -21,18 +21,22 @@ __global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size,
 		dim_pow++;
 	}
 	uint64_t encoded;
-
+	
 	int p = key_size - dim_pow;
 	uint64_t val = pow2(p);
-	if (index != 0 || block != 0) return;
-	for (int j = 1; j <= MAX_MESSAGE_LENGTH; j++) {
+	printf("%d\n", MAX_MESSAGE_LENGTH);
+	printf("%d: %llu - %llu\n", index, index * val, (index + 1) * val - 1);
+	for (int j = 1; j <= 1; j++) { //MAX_MESSAGE_LENGTH
 		uint64_t *messages = get_messages(j);
 		for (uint64_t i = index * val; i <= (index+1) * val - 1; i++) {
-			printf("j=%llu i=%llu\n",j,i);
 			for (int k = 0; k < power(ALPHABET_SIZE, j); k++) {
+				if (*is_finised == 1) {
+					return;
+				}
 				encoded = encode(messages[k], i);
 				if (encoded == coded_message) {
 					message[0] = messages[k];
+					*is_finised = 1;
 					return;
 				}
 			}
@@ -45,7 +49,7 @@ int main()
 	int size = 0;
 	char *m = new char[MAX_MESSAGE_LENGTH + 1];
 	char *message = new char[MAX_MESSAGE_LENGTH + 1];
-	uint64_t key = 1;
+	uint64_t key = 231233;
 	printf("Using 32b key and MAX_MESSAGE_LENGTH=%d\nMessage: ", MAX_MESSAGE_LENGTH);
 	scanf("%s", m);
 
@@ -68,17 +72,19 @@ int main()
 	}
 
 	uint64_t *dev_encoded_message = 0;
-
-
+	int *is_finised;
 	uint64_t *dev_decoded_message=0, *decoded_message = new uint64_t[blocks];
 	cudaStatus = cudaMalloc((void**)&dev_decoded_message, blocks * sizeof(uint64_t));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed!");
 		return 0;
 	}
-
-
-	decrypt<<<1, 1>>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks);
+	cudaStatus = cudaMalloc((void**)&is_finised, sizeof(int));
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "cudaMalloc failed!");
+		return 0;
+	}
+	decrypt<<<1, block_size>>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks, is_finised);
 	
 	cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {
@@ -101,5 +107,9 @@ int main()
 	printf("------------\n");
 	printf("Decoded message numerical: %llu\n", decoded_message[0]);
 	printf("Decoded message string: %s\n", int_to_string(decoded_message[0]));
+
+	cudaFree(dev_decoded_message);
+	cudaFree(is_finised);
+
 }
 

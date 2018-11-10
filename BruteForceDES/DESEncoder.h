@@ -23,7 +23,8 @@ __host__ __device__ uint64_t* generate_keys(uint64_t key) {
 	for (int i = 0; i < 16; i++) {
 		keys[i] = pc(merge_blocks(left_keys[i], right_keys[i], 28), 56, PC2, 48);
 	}
-
+	delete(left_keys);
+	delete(right_keys);
 	return keys;
 }
 
@@ -53,13 +54,13 @@ __host__ __device__ uint64_t encode_block(uint64_t block, uint64_t *keys) {
 	return block;
 }
 
-__host__ __device__ uint64_t encode(uint64_t message_block, uint64_t key)
+__host__ __device__ uint64_t encode(uint64_t &message_block, uint64_t key)
 {
 	uint64_t block;
 	uint64_t *keys = generate_keys(key);
 	
 	block = encode_block(pc(message_block, 64, IP, 64), keys);
-
+	delete(keys);
 	return block;
 }
 
