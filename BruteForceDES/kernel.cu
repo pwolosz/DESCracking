@@ -8,7 +8,7 @@
 #include "iterator"
 #include "Helpers.h"
 
-__global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size, int dev_block_size, int blocks_x, int message_blocks, int *is_finised) {
+__global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size, int dev_block_size, int blocks_x, int message_blocks, int *is_finised, uint64_t *dev_all_messages) {
 	int index = threadIdx.x;
 	int block = blockIdx.x;
 	int dim_pow = 0;
@@ -21,27 +21,41 @@ __global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size,
 		dim_pow++;
 	}
 	uint64_t encoded;
-	
+
 	int p = key_size - dim_pow;
 	uint64_t val = pow2(p);
-	//printf("%d\n", MAX_MESSAGE_LENGTH);
-	//printf("%d: %llu - %llu\n", index, index * val, (index + 1) * val - 1);
-	for (int j = 1; j <= MAX_MESSAGE_LENGTH; j++) { //MAX_MESSAGE_LENGTH
-		uint64_t *messages = get_messages(j);
-		for (uint64_t i = index * val; i <= (index+1) * val - 1; i++) {
-			for (int k = 0; k < power(ALPHABET_SIZE, j); k++) {
-				if (*is_finised == 1) {
-					return;
-				}
-				encoded = encode(messages[k], i);
-				if (encoded == coded_message) {
-					message[0] = messages[k];
-					*is_finised = 1;
-					return;
-				}
+	for (uint64_t i = index * val; i <= (index + 1) * val - 1; i++) {
+		for (int j = 0; j < get_messages_count(); j++) {
+			if (*is_finised == 1) {
+				return;
+			}
+			encoded = encode(dev_all_messages[j], i);
+			if (encoded == coded_message) {
+				message[0] = dev_all_messages[j];
+				*is_finised = 1;
+				return;
 			}
 		}
 	}
+
+}
+
+uint64_t *allocate_messages() {
+	uint64_t *messages = new uint64_t[get_messages_count()];
+	int index = 0;
+
+	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++) {
+		int m_count = power(ALPHABET_SIZE, i + 1);
+		uint64_t *m = get_messages(i + 1);
+
+		for (int j=0; j < m_count; j++) {
+			messages[index + j] = m[j];
+		}
+		index += m_count;
+	}
+
+
+	return messages;
 }
 
 int main()
@@ -49,7 +63,7 @@ int main()
 	int size = 0;
 	char *m = new char[MAX_MESSAGE_LENGTH + 1];
 	char *message = new char[MAX_MESSAGE_LENGTH + 1];
-	uint64_t key = 227328;
+	uint64_t key = 250221;
 	printf("Using 32b key and MAX_MESSAGE_LENGTH=%d\nMessage: ", MAX_MESSAGE_LENGTH);
 	scanf("%s", m);
 
@@ -70,7 +84,7 @@ int main()
 		return 0;
 	}
 
-	uint64_t *dev_encoded_message = 0;
+	uint64_t *dev_all_messages;
 	int *is_finised;
 	uint64_t *dev_decoded_message=0, *decoded_message = new uint64_t[blocks];
 	cudaStatus = cudaMalloc((void**)&dev_decoded_message, blocks * sizeof(uint64_t));
@@ -78,12 +92,26 @@ int main()
 		fprintf(stderr, "cudaMalloc failed!");
 		return 0;
 	}
+
 	cudaStatus = cudaMalloc((void**)&is_finised, sizeof(int));
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMalloc failed!");
 		return 0;
 	}
-	decrypt<<<1, block_size >>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks, is_finised);
+
+	uint64_t *messages = allocate_messages();
+	cudaStatus = cudaMalloc((void**)&dev_all_messages, get_messages_count() * sizeof(uint64_t));
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "cudaMalloc failed!");
+		return 0;
+	}
+
+	cudaStatus = cudaMemcpy(dev_all_messages, messages, get_messages_count() * sizeof(uint64_t), cudaMemcpyHostToDevice);
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "cudaMemcpy failed!");
+		return 0;
+	}
+	decrypt<<<used_device_blocks, block_size>>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks, is_finised, dev_all_messages);
 	
 	cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {

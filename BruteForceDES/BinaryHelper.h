@@ -134,3 +134,12 @@ __device__ __host__ uint64_t* get_messages(int length) {
 __device__ __host__ uint64_t encode_message(char *str, int size) {
 	return string_to_int(str, size);
 }
+
+__device__ __host__ int get_messages_count() {
+	int count = 0;
+	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++) {
+		count += power(ALPHABET_SIZE, i + 1);
+	}
+
+	return count;
+}
