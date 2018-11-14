@@ -77,19 +77,21 @@ __device__ __host__ char* int_to_string(uint64_t message) {
 
 	while (message != 0) {
 		int val = message % bits_value;
-		str[MAX_MESSAGE_LENGTH - 1 - index] = val;
+		str[index] = val;
 		message = message >> BITS_PER_CHAR;
 		index++;
 	}
-	char *out_str = new char[index + 1];
+	int i = 0;
+	char *str_val = new char[index + 1];
 
-	for (int i = 0; i < index; i++) {
-		out_str[i] = str[MAX_MESSAGE_LENGTH - 1 - i];
+	while (i < index) {
+		str_val[index - i - 1] = str[i];
+		i++;
 	}
-	out_str[index] = '\0';
+	str_val[index] = '\0';
 	delete(str);
 
-	return out_str;
+	return str_val;
 }
 
 __device__ __host__ int power(int number, int power) {
