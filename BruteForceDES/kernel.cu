@@ -1,4 +1,3 @@
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <stdio.h>
@@ -7,24 +6,27 @@
 #include "DESEncoder.h"
 #include "iterator"
 #include "Helpers.h"
+#include <ctime>
 
 __global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size, int dev_block_size, int blocks_x, int message_blocks, int *is_finised, uint64_t *dev_all_messages) {
 	int index = threadIdx.x;
 	int block = blockIdx.x;
 	int dim_pow = 0;
-	while (dev_block_size > 1) {
-		dev_block_size = dev_block_size / 2;
+	int dev_b = dev_block_size;
+	int deb_i = blocks_x;
+	while (dev_b > 1) {
+		dev_b = dev_b / 2;
 		dim_pow++;
 	}
-	while (blocks_x > 1) {
-		blocks_x = blocks_x / 2;
+	while (deb_i > 1) {
+		deb_i = deb_i / 2;
 		dim_pow++;
 	}
 	uint64_t encoded;
-
 	int p = key_size - dim_pow;
 	uint64_t val = pow2(p);
-	for (uint64_t i = index * val; i <= (index + 1) * val - 1; i++) {
+
+	for (uint64_t i = index * val + block * val*dev_block_size; i <= (index + 1) * val - 1 + block * val*dev_block_size; i++) {
 		for (int j = 0; j < get_messages_count(); j++) {
 			if (*is_finised == 1) {
 				return;
@@ -38,6 +40,7 @@ __global__ void decrypt(uint64_t coded_message, uint64_t* message, int key_size,
 		}
 	}
 
+	printf("%d - %d finished\n ", block, index);
 }
 
 uint64_t *allocate_messages() {
@@ -63,7 +66,8 @@ int main()
 	int size = 0;
 	char *m = new char[MAX_MESSAGE_LENGTH + 1];
 	char *message = new char[MAX_MESSAGE_LENGTH + 1];
-	uint64_t key = 250221;
+	uint64_t key = 3000;
+	clock_t begin = clock();
 	printf("Using 32b key and MAX_MESSAGE_LENGTH=%d\nMessage: ", MAX_MESSAGE_LENGTH);
 	scanf("%s", m);
 
@@ -111,7 +115,7 @@ int main()
 		fprintf(stderr, "cudaMemcpy failed!");
 		return 0;
 	}
-	decrypt<<<used_device_blocks, block_size>>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks, is_finised, dev_all_messages);
+	decrypt<<<used_device_blocks, block_size >>>(encoded_message, dev_decoded_message, key_size, block_size, used_device_blocks, blocks, is_finised, dev_all_messages);
 	
 	cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {
@@ -124,7 +128,7 @@ int main()
 		fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching decrypt!\n", cudaStatus);
 		return 0;
 	}
-
+	clock_t end = clock();
 	cudaStatus = cudaMemcpy(decoded_message, dev_decoded_message, blocks * sizeof(uint64_t), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaMemcpy failed!");
@@ -134,7 +138,7 @@ int main()
 	printf("------------\n");
 	printf("Decoded message numerical: %llu\n", decoded_message[0]);
 	printf("Decoded message string: %s\n", int_to_string(decoded_message[0]));
-
+	printf("%llu seconds ellapsed\n", uint64_t(end - begin) / CLOCKS_PER_SEC);
 	cudaFree(dev_decoded_message);
 	cudaFree(is_finised);
 

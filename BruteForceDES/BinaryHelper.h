@@ -127,7 +127,7 @@ __device__ __host__ uint64_t* get_messages(int length) {
 
 		words[i] = string_to_int(word, length);
 	}
-	
+	delete(word);
 	return words;
 }
 
