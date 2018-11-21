@@ -22,5 +22,7 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="CPUDecoder.h" />
+    <ClInclude Include="GPUDecoder.h" />
   </ItemGroup>
 </Project>

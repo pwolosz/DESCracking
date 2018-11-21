@@ -102,7 +102,7 @@ __device__ __host__ int power(int number, int power) {
 #endif
 }
 
-__device__ __host__ uint64_t* get_messages(int length) {
+uint64_t* get_messages(int length) {
 	int *indexes = new int[length];
 	int words_count = power(ALPHABET_SIZE, length);
 

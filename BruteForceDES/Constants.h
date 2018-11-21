@@ -8,10 +8,10 @@
 #else
 #define CONSTANT
 #endif
-CONSTANT char ALPHABET[] = { 'a','b','c','d','e' };
-CONSTANT int ALPHABET_SIZE = 5;
+CONSTANT char ALPHABET[] = { 'a','b','c' };
+CONSTANT int ALPHABET_SIZE = 3;
 CONSTANT int PC1_SIZE = 56;
-CONSTANT int MAX_MESSAGE_LENGTH = 5;
+CONSTANT int MAX_MESSAGE_LENGTH = 3;
 CONSTANT int BITS_PER_CHAR = 8;
 CONSTANT unsigned short Y_INDEX_MASK = 33;
 CONSTANT unsigned short X_INDEX_MASK = 30;
