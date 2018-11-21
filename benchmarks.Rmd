@@ -1,0 +1,60 @@
+<center>
+<h3>Benchmarks</h3>
+<h5>DES cracking</h5>
+</center>
+
+```{R, echo = FALSE}
+library(ggplot2)
+library(gridExtra)
+```
+
+```{R, echo = FALSE}
+p1 <- ggplot(NULL, aes(x = c("GPU", "CPU"), y = c(42,354))) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  ggtitle("Key = 819350, message = b") +
+  coord_flip() +
+  labs(x = "", y = "") +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_blank()) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,400)) +
+  geom_text(label = c(42,354), hjust = -0.5, vjust = 0.5)
+  
+
+p2 <- ggplot(NULL, aes(x = c("GPU", "CPU"), y = c(15,0))) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  ggtitle("Key = 2100, message = b") +
+  coord_flip() +
+  labs(x = "", y = "") +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_blank()) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,400))+
+  geom_text(label = c(15,0), hjust = -0.5, vjust = 0.5)
+
+p3 <- ggplot(NULL, aes(x = c("GPU", "CPU"), y = c(1,8))) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  ggtitle("Key = 20481, message = b") +
+  coord_flip() +
+  labs(x = "", y = "Time (seconds)") +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_blank()) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,400))+
+  geom_text(label = c(1,8), hjust = -0.5, vjust = 0.5)
+
+p4 <- ggplot(NULL, aes(x = c("GPU", "CPU"), y = c(279,334))) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  ggtitle("Key = 820244, message = b") +
+  coord_flip() +
+  labs(x = "", y = "Time (seconds)") +
+  theme(plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_blank()) +
+  scale_y_continuous(expand = c(0,0), limits = c(0,400))+
+  geom_text(label = c(279,334), hjust = -0.5, vjust = 0.5)
+
+grid.arrange(p1,p2,nrow = 2)
+grid.arrange(p3,p4,nrow = 2)
+```
+
